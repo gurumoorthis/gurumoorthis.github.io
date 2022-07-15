@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Camera</title>
+	<style>
+		.buttton1{
+			border-radius: 2px;
+			background-color: gray;
+			padding: 10px;
+			border-style: groove;
+		}
+		.mouseover:hover{
+			background-color: gray;
+			cursor: pointer;
+
+		}
+	</style>
+</head>
+<body>
+	<h1>Camera Project</h1>
+	<button class="buttton1 mouseover" id="start">Camera On</button>
+    <video id="video" width="320" height="240" autoplay></video>
+    <button class="buttton1 mouseover" id="click-photo">Take Photo</button>
+    <canvas id="canvas" width="320" height="240"></canvas>
+
+    <script>
+    	let camera_button = document.querySelector("#start");
+        let video = document.querySelector("#video");
+        let click_button = document.querySelector("#click-photo");
+        let canvas = document.querySelector("#canvas");
+        camera_button.addEventListener('click', async function() {
+   	   		let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+	    	video.srcObject = stream;
+        });
+       click_button.addEventListener('click', function() {
+   	   		canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+   	   		let image_data_url = canvas.toDataURL('image/jpeg');
+       });
+    </script>
+
+</body>
+</html>
