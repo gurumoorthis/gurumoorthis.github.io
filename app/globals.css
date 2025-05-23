@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+:root {
+	--color-primary: #3b82f6;
+	--color-black: #212b36;
+	--font-sans: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.btn-primary {
+	background-color: var(--color-primary);
+	@apply text-white rounded-md py-2 px-4 cursor-pointer;
+}
+
+.text-primary {
+	color: var(--color-primary);
+}
