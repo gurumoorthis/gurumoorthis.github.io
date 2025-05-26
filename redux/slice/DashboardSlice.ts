@@ -1,4 +1,3 @@
-// redux/slice/dashboardSlice.ts
 import {
 	createAsyncThunk,
 	createSlice,
@@ -84,7 +83,6 @@ export const getCoverageData = createAsyncThunk(
 			p_user_id: user_id,
 		});
 
-		// Handle errors
 		if (error) return rejectWithValue(error.message);
 		return data as { month: string; total_coverage: number }[];
 	},
@@ -109,8 +107,6 @@ const dashboardSlice = createSlice({
 		},
 		addPolicy(state, action: PayloadAction<Policy>) {
 			state.policies.push(action.payload);
-			// Update filtered policies if needed
-			// Simplest: reapply filters:
 			state.filteredPolicies = state.policies.filter((policy) => {
 				const { type, status, startDate, endDate } = state.filters;
 				if (type && policy.type !== type) return false;

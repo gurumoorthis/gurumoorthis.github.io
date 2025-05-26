@@ -16,7 +16,6 @@ interface AppContextProps {
 	>;
 }
 
-// Default no-op context value
 const defaultContext: AppContextProps = {
 	loading: false,
 	setLoading: () => {},

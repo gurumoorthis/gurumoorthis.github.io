@@ -1,6 +1,6 @@
-// redux/slice/UserSlice.ts
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { supabase } from "@/supabaseClient";
+import secureLocalStorage from "react-secure-storage";
 
 interface User {
 	id: string;
@@ -20,23 +20,24 @@ const initialState: UserState = {
 	error: null,
 };
 
-// Thunk to fetch users
 export const getUserById = createAsyncThunk<
 	User,
 	string,
 	{ rejectValue: string }
 >("users/getById", async (userId, { rejectWithValue }) => {
-	console.log(userId);
 	const { data, error } = await supabase
 		.from("users")
-		.select("*")
+		.select(`
+    *,
+    roles (*)
+  `)
 		.eq("id", userId)
-		.single(); // Use single() to get one user object instead of array
+		.single();
 
 	if (error) {
 		return rejectWithValue(error.message);
 	}
-	console.log(data);
+	secureLocalStorage.setItem("userRole", data?.roles?.name);
 	return data as User;
 });
 

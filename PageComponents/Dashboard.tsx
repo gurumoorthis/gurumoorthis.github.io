@@ -217,31 +217,30 @@ export default function Dashboard() {
 			});
 		}
 	}, [coverageData]);
-	console.log(lineData);
 
 	return (
 		<div>
 			<h1 className="text-2xl font-bold mb-6">Dashboard</h1>
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-				<div className="bg-white p-4 rounded-4xl shadow">
+				<div className="bg-white p-4 rounded-2xl shadow">
 					<h2 className="text-lg font-semibold mb-2">
 						Policy Distribution by Region
 					</h2>
 					<Pie data={pieData} />
 				</div>
-				<div className="bg-white p-4 rounded shadow">
+				<div className="bg-white p-4 rounded-2xl shadow">
 					<h2 className="text-lg font-semibold mb-2">
 						Monthly New Policies by Category
 					</h2>
 					<Bar data={barData} />
 				</div>
-				<div className="bg-white p-4 rounded shadow">
+				<div className="bg-white p-4 rounded-2xl shadow">
 					<h2 className="text-lg font-semibold mb-2">
 						Total Coverage Amount Over Time
 					</h2>
 					<Line data={lineData} options={lineOptions} />
 				</div>
-				<div className="bg-white p-4 rounded shadow">
+				<div className="bg-white p-4 rounded-2xl shadow">
 					<h2 className="text-lg font-semibold mb-2">
 						Policy Count by Type and Status
 					</h2>

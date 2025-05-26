@@ -17,21 +17,15 @@ export default function RootLayout({
 	const pathname = usePathname();
 	const [role, setRole] = useState<Role | null>(null);
 
-	// List of pages where the sidebar should be shown
-	const sidebarPages = [
-		"/dashboard",
-		"/policies",
-		"/policyholders",
-		"/settings",
-	];
+	const sidebarPages = ["/", "/policies", "/policyholders", "/settings"];
 	const showSidebar = sidebarPages.some((page) => pathname.startsWith(page));
 
 	useEffect(() => {
-		const storedRole = secureLocalStorage.getItem("userRole") as Role | null;
-		if (storedRole) {
+		if (pathname) {
+			const storedRole = secureLocalStorage.getItem("userRole") as Role | null;
 			setRole(storedRole);
 		}
-	}, []);
+	}, [pathname]);
 
 	return (
 		<html lang="en">

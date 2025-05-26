@@ -9,7 +9,6 @@ import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/supabaseClient";
 import { toast } from "sonner";
-import { ERROR_MESSAGES } from "@/utils/constants";
 import { getToastOptions } from "@/utils/getToastOptions";
 
 export default function SignUpPage() {
@@ -50,7 +49,6 @@ export default function SignUpPage() {
 				return;
 			}
 
-			// Get role ID
 			const { data: roleData, error: roleError } = await supabase
 				.from("roles")
 				.select("id")
@@ -73,7 +71,6 @@ export default function SignUpPage() {
 				return;
 			}
 
-			// Insert user profile with role
 			const insertResponse = await supabase.from("users").insert([
 				{
 					id: userDetails.id,

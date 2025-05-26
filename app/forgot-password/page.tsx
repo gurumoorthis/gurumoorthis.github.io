@@ -19,7 +19,6 @@ export default function ForgotPasswordPage() {
 	const [newPassword, setNewPassword] = useState("");
 	const [accessToken, setAccessToken] = useState<string | null>(null);
 
-	// Check for access_token in URL hash
 	useEffect(() => {
 		const hash = window.location.hash;
 		const token = new URLSearchParams(hash.slice(1)).get("access_token");
@@ -28,7 +27,6 @@ export default function ForgotPasswordPage() {
 		}
 	}, []);
 
-	// Send password reset link
 	const handlePasswordResetRequest = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setLoading(true);
@@ -46,7 +44,6 @@ export default function ForgotPasswordPage() {
 		}
 	};
 
-	// Update user's password
 	const handleUpdatePassword = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!accessToken) return;

@@ -39,12 +39,23 @@ export default function LoginPage() {
 		} else {
 			toast.success("Login success", getToastOptions());
 			const user = response.data.user;
-			console.log("jhdasdh");
 			dispatch(getUserById(user.id ?? ""));
 			secureLocalStorage.setItem("user_id", user.id);
 			secureLocalStorage.setItem("email", user.email ?? "");
-			secureLocalStorage.setItem("role", user.role ?? "");
-			// router.push("/");
+			secureLocalStorage.setItem("userRole", user.role ?? "");
+			secureLocalStorage.setItem(
+				"access_token",
+				response.data?.session?.access_token ?? "",
+			);
+			secureLocalStorage.setItem(
+				"refresh_token",
+				response.data?.session?.refresh_token,
+			);
+			document.cookie = `access_token=${response.data?.session?.access_token}; Path=/; SameSite=Strict;`;
+			document.cookie = `refresh_token=${response.data?.session?.refresh_token}; Path=/; SameSite=Strict;`;
+			setTimeout(() => {
+				router.push("/");
+			}, 2000);
 		}
 	};
 
