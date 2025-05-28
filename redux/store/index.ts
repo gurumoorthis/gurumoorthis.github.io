@@ -7,6 +7,7 @@ import { persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import AuthReducer from "@/redux/slice/AuthSlice";
 import DashboardReducer from "@/redux/slice/DashboardSlice";
+import PolicyReducer from "@/redux/slice/PolicySlice";
 
 const persistConfig = {
 	key: "root",
@@ -17,6 +18,7 @@ const persistConfig = {
 const appReducer = combineReducers({
 	AUTH: AuthReducer,
 	DASHBOARD: DashboardReducer,
+	POLICY: PolicyReducer,
 });
 
 const rootReducer = (

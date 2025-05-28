@@ -4,6 +4,9 @@
 			"correctness": {
 				"noUnusedVariables": "error",
 				"noUnusedImports": "error"
+			},
+			"suspicious": {
+				"noArrayIndexKey": "off"
 			}
 		}
 	}

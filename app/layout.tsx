@@ -3,11 +3,11 @@ import "./globals.css";
 import { AppProvider } from "./context/AppContext";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import type { Role } from "@/GlobalComponents/types";
 import secureLocalStorage from "react-secure-storage";
 import Sidebar from "@/GlobalComponents/Sidebar";
 import { Toaster } from "sonner";
 import ReduxProvider from "@/ReduxProvider";
+import type { Role } from "@/utils/types";
 
 export default function RootLayout({
 	children,
@@ -34,9 +34,9 @@ export default function RootLayout({
 				<ReduxProvider>
 					<AppProvider>
 						{showSidebar && role ? (
-							<div className="flex">
+							<div className="flex flex-col sm:flex-row">
 								<Sidebar role={role} />
-								<main className="ml-64 flex-1 p-8 overflow-y-auto h-screen">
+								<main className="sm:ml-64 flex-1 px-8 pb-8 pt-2 sm:pt-8 overflow-y-auto h-screen">
 									{children}
 								</main>
 							</div>

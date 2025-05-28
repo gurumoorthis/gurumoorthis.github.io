@@ -13,6 +13,8 @@ import { getToastOptions } from "@/utils/getToastOptions";
 
 export default function SignUpPage() {
 	const router = useRouter();
+	const [phone, setPhone] = useState("");
+	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
@@ -21,7 +23,6 @@ export default function SignUpPage() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-
 		if (password !== confirmPassword) {
 			toast.error("Passwords do not match", getToastOptions());
 			return;
@@ -32,7 +33,6 @@ export default function SignUpPage() {
 				email,
 				password,
 			});
-
 			if (signUpResponse.error) {
 				toast.error(
 					`Error signing up: ${signUpResponse.error.message}`,
@@ -41,14 +41,12 @@ export default function SignUpPage() {
 				setLoading(false);
 				return;
 			}
-
 			const userDetails = signUpResponse.data.user;
 			if (!userDetails) {
 				toast.error("User details missing after signup.", getToastOptions());
 				setLoading(false);
 				return;
 			}
-
 			const { data: roleData, error: roleError } = await supabase
 				.from("roles")
 				.select("id")
@@ -63,22 +61,22 @@ export default function SignUpPage() {
 				setLoading(false);
 				return;
 			}
-
 			const roleId = roleData?.id;
 			if (!roleId) {
 				toast.error("Role ID not found.", getToastOptions());
 				setLoading(false);
 				return;
 			}
-
 			const insertResponse = await supabase.from("users").insert([
 				{
 					id: userDetails.id,
 					email: userDetails.email,
 					role_id: roleId,
+					password,
+					name,
+					phone,
 				},
 			]);
-
 			if (insertResponse.error) {
 				toast.error(
 					insertResponse.error.message ??
@@ -88,7 +86,6 @@ export default function SignUpPage() {
 				setLoading(false);
 				return;
 			}
-
 			toast.success(
 				"Confirmation email sent. Please check your inbox.",
 				getToastOptions(),
@@ -116,6 +113,34 @@ export default function SignUpPage() {
 					</div>
 					<form onSubmit={handleSubmit} className="space-y-5">
 						<div className="space-y-2">
+							<Label htmlFor="name" className="text-stone-800 text-md">
+								Name
+							</Label>
+							<Input
+								required
+								id="name"
+								placeholder="Enter your name"
+								value={name}
+								onChange={(e) => setName(e.target.value.trimStart())}
+								disabled={loading}
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label htmlFor="phone" className="text-stone-800 text-md">
+								Phone Number
+							</Label>
+							<Input
+								required
+								id="phone"
+								placeholder="Enter your phone number"
+								value={phone}
+								onChange={(e) => setPhone(e.target.value.trimStart())}
+								disabled={loading}
+								maxLength={10}
+								minLength={10}
+							/>
+						</div>
+						<div className="space-y-2">
 							<Label htmlFor="email" className="text-stone-800 text-md">
 								Email Address
 							</Label>
@@ -129,7 +154,6 @@ export default function SignUpPage() {
 								disabled={loading}
 							/>
 						</div>
-
 						<div className="space-y-2">
 							<Label htmlFor="password" className="text-stone-800 text-md">
 								Password
@@ -143,6 +167,8 @@ export default function SignUpPage() {
 									value={password}
 									onChange={(e) => setPassword(e.target.value.trim())}
 									disabled={loading}
+									maxLength={6}
+									minLength={6}
 								/>
 								<Button
 									type="button"
@@ -159,7 +185,6 @@ export default function SignUpPage() {
 								</Button>
 							</div>
 						</div>
-
 						<div className="space-y-2">
 							<Label
 								htmlFor="confirmPassword"
@@ -177,7 +202,6 @@ export default function SignUpPage() {
 								disabled={loading}
 							/>
 						</div>
-
 						<Button
 							type="submit"
 							className="w-full btn-primary"

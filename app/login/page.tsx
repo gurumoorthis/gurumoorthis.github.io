@@ -39,10 +39,10 @@ export default function LoginPage() {
 		} else {
 			toast.success("Login success", getToastOptions());
 			const user = response.data.user;
+			console.log(user);
 			dispatch(getUserById(user.id ?? ""));
 			secureLocalStorage.setItem("user_id", user.id);
 			secureLocalStorage.setItem("email", user.email ?? "");
-			secureLocalStorage.setItem("userRole", user.role ?? "");
 			secureLocalStorage.setItem(
 				"access_token",
 				response.data?.session?.access_token ?? "",

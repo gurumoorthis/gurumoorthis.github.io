@@ -1,10 +1,13 @@
 "use client";
 
+import { Skeleton } from "@/components/ui/skeleton";
+import PageTitle from "@/GlobalComponents/PageTitle";
 import { useAppDispatch } from "@/redux/hooks";
 import {
+	getCoverageByType,
 	getCoverageData,
-	getPolicies,
-	getPoliciesByTypeStatus,
+	getPoliciesByTypeStatusByUser,
+	getPremiumSumByType,
 } from "@/redux/slice/DashboardSlice";
 import type { RootState } from "@/redux/store";
 import {
@@ -34,40 +37,6 @@ ChartJS.register(
 	LineElement,
 	PointElement,
 );
-
-const pieData = {
-	labels: ["North", "South", "East", "West"],
-	datasets: [
-		{
-			label: "Policy Count",
-			data: [120, 90, 75, 60],
-			backgroundColor: ["#60A5FA", "#34D399", "#FBBF24", "#F87171"],
-			borderColor: ["#3B82F6", "#10B981", "#F59E0B", "#EF4444"],
-			borderWidth: 1,
-		},
-	],
-};
-
-const barData = {
-	labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-	datasets: [
-		{
-			label: "Life",
-			data: [30, 45, 60, 50, 55, 65],
-			backgroundColor: "#3B82F6",
-		},
-		{
-			label: "Health",
-			data: [25, 35, 40, 45, 50, 55],
-			backgroundColor: "#10B981",
-		},
-		{
-			label: "Auto",
-			data: [20, 30, 35, 40, 42, 50],
-			backgroundColor: "#F59E0B",
-		},
-	],
-};
 
 const lineOptions = {
 	responsive: true,
@@ -123,14 +92,25 @@ interface stackedBarChartDataSetsProps {
 	backgroundColor: string;
 }
 
+interface pieDataProps {
+	labels: string[];
+	datasets: {
+		label: string;
+		data: number[];
+		borderColor: string[];
+		backgroundColor: string[];
+		borderWidth: number;
+	}[];
+}
+
 const statusColors: Record<string, string> = {
-	Active: "#4ADE80",
-	Lapsed: "#FACC15",
-	Cancelled: "#F87171",
+	active: "#4ADE80",
+	lapsed: "#FACC15",
+	cancelled: "#F87171",
 };
 
-const types = ["Life", "Health", "Auto"];
-const statuses = ["Active", "Lapsed", "Cancelled"];
+const types = ["life", "health", "auto"];
+const statuses = ["active", "lapsed", "cancelled"];
 interface LineChartDataset {
 	labels: string[];
 	datasets: {
@@ -143,11 +123,23 @@ interface LineChartDataset {
 	}[];
 }
 
+interface BarChartDataset {
+	labels: string[];
+	datasets: {
+		label: string;
+		data: number[];
+		backgroundColor: string;
+	}[];
+}
+
 export default function Dashboard() {
 	const userId = secureLocalStorage.getItem("user_id") as string;
-	const { policyCountsByTypeStatus, coverageData } = useSelector(
-		(state: RootState) => state.DASHBOARD,
-	);
+	const {
+		policyCountsByTypeStatus,
+		coverageData,
+		coverageTypeData,
+		premiumByType,
+	} = useSelector((state: RootState) => state.DASHBOARD);
 	const dispatch = useAppDispatch();
 	const [stackedBarChartData, setStackedBarChartData] = useState<{
 		labels: string[];
@@ -169,13 +161,54 @@ export default function Dashboard() {
 			},
 		],
 	});
+	const [barData, setBarData] = useState<BarChartDataset>({
+		labels: [],
+		datasets: [],
+	});
+	const [pieData, setPieData] = useState<pieDataProps>({
+		labels: [],
+		datasets: [],
+	});
+	const [isLoading, setIsLoading] = useState(true);
+	useEffect(() => {
+		if (premiumByType.length > 0) {
+			const labels = premiumByType.map((item) => item.type);
+			const data = premiumByType.map((item) => Number(item.total_premium));
+
+			const colors = ["#60A5FA", "#34D399", "#FBBF24"];
+			const borders = ["#3B82F6", "#10B981", "#F59E0B"];
+
+			setPieData({
+				labels,
+				datasets: [
+					{
+						label: "Total Premium ($)",
+						data,
+						backgroundColor: colors.slice(0, labels.length),
+						borderColor: borders.slice(0, labels.length),
+						borderWidth: 1,
+					},
+				],
+			});
+		}
+	}, [premiumByType]);
 
 	useEffect(() => {
-		if (userId) {
-			dispatch(getPolicies(userId));
-			dispatch(getPoliciesByTypeStatus(userId));
-			dispatch(getCoverageData(userId));
-		}
+		const fetchAllData = async () => {
+			if (!userId) return;
+			try {
+				await dispatch(getPoliciesByTypeStatusByUser(userId));
+				await dispatch(getCoverageData(userId));
+				await dispatch(getCoverageByType(userId));
+				await dispatch(getPremiumSumByType());
+			} catch (error) {
+				console.error(error);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		fetchAllData();
 	}, [dispatch, userId]);
 
 	useEffect(() => {
@@ -195,6 +228,25 @@ export default function Dashboard() {
 			datasets,
 		});
 	}, [policyCountsByTypeStatus]);
+
+	useEffect(() => {
+		if (coverageTypeData.length > 0) {
+			setBarData({
+				labels: coverageTypeData.map((item: { month: string }) =>
+					moment(item.month).format("MMM"),
+				),
+				datasets: [
+					{
+						label: "Total Coverage ($)",
+						data: coverageTypeData.map(
+							(item: { total_coverage: number }) => item.total_coverage,
+						),
+						backgroundColor: "#3b82f6",
+					},
+				],
+			});
+		}
+	}, [coverageTypeData]);
 
 	useEffect(() => {
 		if (Object.keys(coverageData).length > 0) {
@@ -218,35 +270,53 @@ export default function Dashboard() {
 		}
 	}, [coverageData]);
 
+	const sections = [
+		"Policy Distribution by Region",
+		"Monthly New Policies by Category",
+		"Total Coverage Amount Over Time",
+		"Policy Count by Type and Status",
+	];
+
 	return (
-		<div>
-			<h1 className="text-2xl font-bold mb-6">Dashboard</h1>
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-				<div className="bg-white p-4 rounded-2xl shadow">
-					<h2 className="text-lg font-semibold mb-2">
-						Policy Distribution by Region
-					</h2>
-					<Pie data={pieData} />
+		<div className="flex flex-col gap-4">
+			<PageTitle title="Dashboard" />
+			{isLoading ? (
+				<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+					{sections.map((title) => (
+						<div key={title} className="bg-white p-4 rounded-2xl shadow">
+							<h2 className="text-lg font-semibold mb-4">{title}</h2>
+							<Skeleton className="w-full h-50" />
+						</div>
+					))}
 				</div>
-				<div className="bg-white p-4 rounded-2xl shadow">
-					<h2 className="text-lg font-semibold mb-2">
-						Monthly New Policies by Category
-					</h2>
-					<Bar data={barData} />
+			) : (
+				<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+					<div className="bg-white p-4 rounded-2xl shadow">
+						<h2 className="text-lg font-semibold mb-4">
+							Policy Distribution by Region
+						</h2>
+						<Pie data={pieData} />
+					</div>
+					<div className="bg-white p-4 rounded-2xl shadow">
+						<h2 className="text-lg font-semibold mb-4">
+							Monthly New Policies by Category
+						</h2>
+						<Bar data={barData} />
+					</div>
+					<div className="bg-white p-4 rounded-2xl shadow">
+						<h2 className="text-lg font-semibold mb-4">
+							Total Coverage Amount Over Time
+						</h2>
+						<Line data={lineData} options={lineOptions} />
+					</div>
+					<div className="bg-white p-4 rounded-2xl shadow">
+						<h2 className="text-lg font-semibold mb-4">
+							Policy Count by Type and Status
+						</h2>
+						<Bar data={stackedBarChartData} options={stackedBarOptions} />
+					</div>
 				</div>
-				<div className="bg-white p-4 rounded-2xl shadow">
-					<h2 className="text-lg font-semibold mb-2">
-						Total Coverage Amount Over Time
-					</h2>
-					<Line data={lineData} options={lineOptions} />
-				</div>
-				<div className="bg-white p-4 rounded-2xl shadow">
-					<h2 className="text-lg font-semibold mb-2">
-						Policy Count by Type and Status
-					</h2>
-					<Bar data={stackedBarChartData} options={stackedBarOptions} />
-				</div>
-			</div>
+			)}
 		</div>
 	);
 }
